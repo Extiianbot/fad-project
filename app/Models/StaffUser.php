@@ -7,9 +7,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 
-class StaffUser extends Model
+class StaffUser extends Authenticatable
 {
     use HasFactory, Notifiable;
+
+     protected $table = 'staff_users'; // Specify the table name if different
     
     protected $fillable = [
         'username',
