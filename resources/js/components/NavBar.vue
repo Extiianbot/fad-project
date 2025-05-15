@@ -9,11 +9,14 @@
 
         <!-- Right: Auth Buttons -->
         <div class="flex space-x-4">
-          <a href="/login"
+          <!-- Emit login event -->
+          <a href="#"
+             @click.prevent="$emit('login')"
              class="px-4 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition duration-200">
             Login
           </a>
-          <!-- Register triggers modal -->
+
+          <!-- Emit register event -->
           <a href="#"
              @click.prevent="$emit('register')"
              class="px-4 py-2 rounded-md text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white transition duration-200">

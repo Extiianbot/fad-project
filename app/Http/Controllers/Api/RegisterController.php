@@ -2,33 +2,34 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\StaffUser;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\StaffUser;
+
+
 
 class RegisterController extends Controller
 {
     public function register(Request $request)
     {
-        // Validation
         $request->validate([
             'username' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:staff_users',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|string|min:6',
             'position' => 'required|string',
             'division' => 'required|string',
         ]);
 
-        // Create new staff user
         $user = StaffUser::create([
             'username' => $request->username,
             'email' => $request->email,
-            'password' => bcrypt($request->password), // Explicitly hash the password
+            'password' => bcrypt($request->password),
             'position' => $request->position,
             'division' => $request->division,
         ]);
 
-        // Return response
         return response()->json(['message' => 'User registered successfully!', 'user' => $user], 201);
     }
 }
+    
+

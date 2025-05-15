@@ -1,7 +1,8 @@
 <script setup>
 import { defineProps, ref } from 'vue';
-import axios from 'axios'; // Import Axios
+import axios from 'axios';
 import NavBar from '../components/NavBar.vue';
+import LoginModal from '../components/LoginModal.vue';
 import Modal from '../components/RegisterModal.vue';
 
 const props = defineProps({
@@ -15,118 +16,138 @@ const props = defineProps({
   },
 });
 
-const showModal = ref(false);
+const showRegisterModal = ref(false);
+const showLoginModal = ref(false);
 
-const form = ref({
+// Register form
+const registerForm = ref({
   username: '',
   email: '',
   position: '',
   division: '',
   password: '',
-  confirmPassword: '',
 });
 
+// Login form
+const loginForm = ref({
+  email: '',
+  password: '',
+});
+
+// Register user
 async function submitRegistration() {
-  if (form.value.password !== form.value.confirmPassword) {
-    alert("Passwords do not match!");
-    return;
-  }
-
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/register', {
-      username: form.value.username,
-      email: form.value.email,
-      password: form.value.password,
-      position: form.value.position,
-      division: form.value.division,
-    });
-
+    const response = await axios.post('http://127.0.0.1:8000/api/register', registerForm.value);
     console.log('Registration successful:', response.data);
     alert('User registered successfully!');
-
-    // Reset form and close modal
-    form.value = {
+    registerForm.value = {
       username: '',
       email: '',
       position: '',
       division: '',
       password: '',
-      confirmPassword: '',
     };
-    showModal.value = false;
+    showRegisterModal.value = false;
   } catch (error) {
     console.error('Registration failed:', error.response?.data || error.message);
     alert('Registration failed. Please try again.');
   }
 }
-</script>
 
+// Login user
+async function submitLogin() {
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/api/login', loginForm.value);
+    console.log('Login successful:', response.data);
+    alert('Login successful!');
+    loginForm.value = {
+      email: '',
+      password: '',
+    };
+    showLoginModal.value = false;
+    // Optional: localStorage.setItem('auth_token', response.data.token);
+  } catch (error) {
+    console.error('Login failed:', error.response?.data || error.message);
+    alert('Login failed. Please try again.');
+  }
+}
+</script>
 
 <template>
   <div class="min-h-screen bg-gray-900 text-white">
-    <!-- NavBar with register button that triggers the modal -->
-    <NavBar @register="showModal = true" />
+    <!-- NavBar now controls modals -->
+    <NavBar @login="showLoginModal = true" @register="showRegisterModal = true" />
 
     <div class="max-w-7xl mx-auto px-4 py-8">
       <h1 class="text-3xl font-bold mb-6 text-white">Staff and Venue Management</h1>
 
-      <!-- Modal for user registration -->
-  <Modal v-if="showModal" title="Register New Staff" @close="showModal = false">
-    <form @submit.prevent="submitRegistration">
-      <div class="mb-4">
-        <label class="block text-sm font-medium mb-1">Username</label>
-        <input v-model="form.username" type="text" class="w-full p-2 border rounded" required />
-      </div>
+      <!-- Removed extra Login button from here -->
 
-      <div class="mb-4">
-        <label class="block text-sm font-medium mb-1">Email</label>
-        <input v-model="form.email" type="email" class="w-full p-2 border rounded" required />
-      </div>
+      <!-- Login Modal -->
+      <LoginModal
+        v-if="showLoginModal"
+        title="Login"
+        :form="loginForm"
+        @close="showLoginModal = false"
+        @submit="submitLogin"
+      />
 
-      <div class="mb-4">
-        <label class="block text-sm font-medium mb-1">Password</label>
-        <input v-model="form.password" type="password" class="w-full p-2 border rounded" required />
-      </div>
+      <!-- Register Modal -->
+      <Modal
+        v-if="showRegisterModal"
+        title="Register New Staff"
+        @close="showRegisterModal = false"
+      >
+        <form @submit.prevent="submitRegistration">
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Username</label>
+            <input v-model="registerForm.username" type="text" class="w-full p-2 border rounded" required />
+          </div>
 
-    <div class="mb-4">
-        <label class="block text-sm font-medium mb-1">Confirm Password</label>
-        <input v-model="form.confirmPassword" type="password" class="w-full p-2 border rounded" required />
-    </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Email</label>
+            <input v-model="registerForm.email" type="email" class="w-full p-2 border rounded" required />
+          </div>
 
-      <div class="mb-4 flex gap-4">
-        <div class="w-1/2">
-          <label class="block text-sm font-medium mb-1">Position</label>
-          <input v-model="form.position" type="text" class="w-full p-2 border rounded" required />
-        </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Password</label>
+            <input v-model="registerForm.password" type="password" class="w-full p-2 border rounded" required />
+          </div>
 
-        <div class="w-1/2">
-          <label class="block text-sm font-medium mb-1">Division</label>
-          <select v-model="form.division" class="w-full p-2 border rounded" required>
-            <option disabled value="">Select Division</option>
-            <option value="HR">PMED</option>
-            <option value="IT">ICT</option>
-            <option value="Marketing">FAD</option>
-        </select>
-        </div>
-      </div>
+          <div class="mb-4 flex gap-4">
+            <div class="w-1/2">
+              <label class="block text-sm font-medium mb-1">Position</label>
+              <input v-model="registerForm.position" type="text" class="w-full p-2 border rounded" required />
+            </div>
 
-      <div class="flex justify-end">
-        <button
-          type="submit"
-          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
-        >
-          Register
-        </button>
-      </div>
-    </form>
-  </Modal>
+            <div class="w-1/2">
+              <label class="block text-sm font-medium mb-1">Division</label>
+              <select v-model="registerForm.division" class="w-full p-2 border rounded" required>
+                <option disabled value="">Select Division</option>
+                <option value="PMED">PMED</option>
+                <option value="ICT">ICT</option>
+                <option value="FAD">FAD</option>
+              </select>
+            </div>
+          </div>
 
-      <!-- Tables: Users and Venues -->
-      <div class="flex flex-col lg:flex-row gap-6">
-        <!-- Left Table: Users -->
+          <div class="flex justify-end">
+            <button
+              type="submit"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+            >
+              Register
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <!-- Tables -->
+      <div class="flex flex-col lg:flex-row gap-6 mt-8">
+        <!-- Users Table -->
         <div class="w-full lg:w-1/2">
           <h2 class="text-xl font-semibold mb-4 text-gray-200">Staff Users</h2>
-          <div v-if="props.users && props.users.length > 0" class="overflow-x-auto bg-gray-800 rounded-xl shadow-md">
+          <div v-if="props.users.length" class="overflow-x-auto bg-gray-800 rounded-xl shadow-md">
             <table class="min-w-full divide-y divide-gray-700">
               <thead class="bg-gray-700">
                 <tr>
@@ -153,10 +174,10 @@ async function submitRegistration() {
           </div>
         </div>
 
-        <!-- Right Table: Venues -->
+        <!-- Venues Table -->
         <div class="w-full lg:w-1/2">
           <h2 class="text-xl font-semibold mb-4 text-gray-200">Venues</h2>
-          <div v-if="props.venues && props.venues.length > 0" class="overflow-x-auto bg-gray-800 rounded-xl shadow-md">
+          <div v-if="props.venues.length" class="overflow-x-auto bg-gray-800 rounded-xl shadow-md">
             <table class="min-w-full divide-y divide-gray-700">
               <thead class="bg-gray-700">
                 <tr>
