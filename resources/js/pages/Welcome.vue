@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="js">
 import { defineProps, ref, onMounted } from 'vue';
 import axios from 'axios';
 import NavBar from '../components/NavBar.vue';

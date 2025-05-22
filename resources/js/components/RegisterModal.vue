@@ -13,7 +13,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="js">
 defineProps({
   title: {
     type: String,

@@ -36,7 +36,7 @@
   </nav>
 </template>
 
-<script setup>
+<script setup lang="js">
 import { ref, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 

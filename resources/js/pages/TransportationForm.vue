@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="js">
 import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import HomeNavBar from '../components/HomeNavBar.vue';

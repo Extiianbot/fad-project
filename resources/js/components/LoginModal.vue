@@ -9,14 +9,14 @@
       <form @submit.prevent="$emit('submit')">
         <div class="mb-4">
           <label class="block text-sm font-medium mb-1">Email</label>
-          <input v-model="form.email" type="email" class="w-full p-2 border rounded" required />
-          <div v-if="form.errors.email" class="text-red-500 text-sm mt-1">{{ form.errors.email }}</div>
+          <input v-model="localForm.email" type="email" class="w-full p-2 border rounded" required @input="updateForm" />
+          <div v-if="localForm.errors.email" class="text-red-500 text-sm mt-1">{{ localForm.errors.email }}</div>
         </div>
 
         <div class="mb-4">
           <label class="block text-sm font-medium mb-1">Password</label>
-          <input v-model="form.password" type="password" class="w-full p-2 border rounded" required />
-          <div v-if="form.errors.password" class="text-red-500 text-sm mt-1">{{ form.errors.password }}</div>
+          <input v-model="localForm.password" type="password" class="w-full p-2 border rounded" required @input="updateForm" />
+          <div v-if="localForm.errors.password" class="text-red-500 text-sm mt-1">{{ localForm.errors.password }}</div>
         </div>
 
         <div class="flex justify-end">
@@ -29,9 +29,19 @@
   </div>
 </template>
 
-<script setup>
-import { defineProps, defineEmits } from 'vue';
+<script setup lang="js">
+import { defineProps, defineEmits, ref, watch } from 'vue';
 
-defineProps(['title', 'form']);
-defineEmits(['close', 'submit']);
+const props = defineProps(['title', 'form']);
+const emit = defineEmits(['close', 'submit']);
+
+const localForm = ref({ ...props.form });
+
+watch(() => props.form, (newVal) => {
+  localForm.value = { ...newVal };
+}, { deep: true });
+
+function updateForm() {
+  emit('update:form', localForm.value);
+}
 </script>

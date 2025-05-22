@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="js">
 import HomeNavBar from '../components/HomeNavBar.vue'
 import { Link } from '@inertiajs/vue3'
 </script>

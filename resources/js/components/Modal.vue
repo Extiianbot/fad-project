@@ -21,7 +21,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="js">
 import { defineProps, defineEmits } from 'vue'
 
 const props = defineProps({
