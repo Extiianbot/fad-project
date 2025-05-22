@@ -10,16 +10,18 @@
         <div class="mb-4">
           <label class="block text-sm font-medium mb-1">Email</label>
           <input v-model="form.email" type="email" class="w-full p-2 border rounded" required />
+          <div v-if="form.errors.email" class="text-red-500 text-sm mt-1">{{ form.errors.email }}</div>
         </div>
 
         <div class="mb-4">
           <label class="block text-sm font-medium mb-1">Password</label>
           <input v-model="form.password" type="password" class="w-full p-2 border rounded" required />
+          <div v-if="form.errors.password" class="text-red-500 text-sm mt-1">{{ form.errors.password }}</div>
         </div>
 
         <div class="flex justify-end">
-          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
-            Login
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded" :disabled="form.processing">
+            {{ form.processing ? 'Logging in...' : 'Login' }}
           </button>
         </div>
       </form>

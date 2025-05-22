@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('venues', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('staff_users_id')->constrained()->onDelete('cascade');
-            $table->string('conferen_type');
+            $table->foreignId('staff_user_id')->constrained()->onDelete('cascade');
+            $table->string('conference_type');
             $table->integer('number_of_participants');
             $table->date('date_of_event');
             $table->time('time_start');

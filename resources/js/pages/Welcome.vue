@@ -1,12 +1,13 @@
 <script setup>
-import { defineProps, ref } from 'vue';
+import { defineProps, ref, onMounted } from 'vue';
 import axios from 'axios';
 import NavBar from '../components/NavBar.vue';
 import LoginModal from '../components/LoginModal.vue';
 import Modal from '../components/RegisterModal.vue';
+import { useForm, Link } from '@inertiajs/vue3';
 
 const props = defineProps({
-  users: {
+  transportations: {
     type: Array,
     default: () => [],
   },
@@ -19,6 +20,26 @@ const props = defineProps({
 const showRegisterModal = ref(false);
 const showLoginModal = ref(false);
 
+// Light/Dark mode toggle
+const isDark = ref(false);
+function toggleDark() {
+  isDark.value = !isDark.value;
+  if (isDark.value) {
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
+  }
+}
+onMounted(() => {
+  const theme = localStorage.getItem('theme');
+  if (theme === 'dark') {
+    isDark.value = true;
+    document.documentElement.classList.add('dark');
+  }
+});
+
 // Register form
 const registerForm = ref({
   username: '',
@@ -29,7 +50,7 @@ const registerForm = ref({
 });
 
 // Login form
-const loginForm = ref({
+const loginForm = useForm({
   email: '',
   password: '',
 });
@@ -55,33 +76,31 @@ async function submitRegistration() {
 }
 
 // Login user
-async function submitLogin() {
-  try {
-    const response = await axios.post('http://127.0.0.1:8000/api/login', loginForm.value);
-    console.log('Login successful:', response.data);
-    alert('Login successful!');
-    loginForm.value = {
-      email: '',
-      password: '',
-    };
-    showLoginModal.value = false;
-    // Optional: localStorage.setItem('auth_token', response.data.token);
-  } catch (error) {
-    console.error('Login failed:', error.response?.data || error.message);
-    alert('Login failed. Please try again.');
-  }
+function submitLogin() {
+  loginForm.post(route('login'), {
+    onSuccess: () => {
+      showLoginModal.value = false;
+      window.location.href = '/dashboard';
+    },
+    onError: (errors) => {
+      console.error('Login failed:', errors);
+      if (errors.email) {
+        alert(errors.email);
+      } else {
+        alert('Login failed. Please check your credentials.');
+      }
+    },
+  });
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-900 text-white">
+  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 dark:text-gray-100">
     <!-- NavBar now controls modals -->
     <NavBar @login="showLoginModal = true" @register="showRegisterModal = true" />
 
     <div class="max-w-7xl mx-auto px-4 py-8">
-      <h1 class="text-3xl font-bold mb-6 text-white">Staff and Venue Management</h1>
-
-      <!-- Removed extra Login button from here -->
+      <h1 class="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">Transportation Request and Venue Reservation</h1>
 
       <!-- Login Modal -->
       <LoginModal
@@ -143,63 +162,71 @@ async function submitLogin() {
       </Modal>
 
       <!-- Tables -->
-      <div class="flex flex-col lg:flex-row gap-6 mt-8">
-        <!-- Users Table -->
-        <div class="w-full lg:w-1/2">
-          <h2 class="text-xl font-semibold mb-4 text-gray-200">Staff Users</h2>
-          <div v-if="props.users.length" class="overflow-x-auto bg-gray-800 rounded-xl shadow-md">
-            <table class="min-w-full divide-y divide-gray-700">
-              <thead class="bg-gray-700">
+      <div class="flex flex-col lg:flex-row gap-8 mt-10 justify-center">
+        <!-- Transportation Table -->
+        <div class="w-full lg:w-1/2 max-w-2xl mx-auto">
+          <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Transportation Requests</h2>
+          <div v-if="props.transportations.length" class="overflow-x-auto rounded-xl shadow-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead class="bg-gray-100 dark:bg-gray-800">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-300">ID</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-300">Username</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-300">Email</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-300">Position</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-300">Division</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Destination</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Passengers</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Date Needed</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Status</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-700">
-                <tr v-for="user in props.users" :key="user.id" class="hover:bg-gray-700">
-                  <td class="px-6 py-4">{{ user.id }}</td>
-                  <td class="px-6 py-4">{{ user.username }}</td>
-                  <td class="px-6 py-4">{{ user.email }}</td>
-                  <td class="px-6 py-4">{{ user.position }}</td>
-                  <td class="px-6 py-4">{{ user.division }}</td>
+              <tbody>
+                <tr v-for="transportation in props.transportations" :key="transportation.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ transportation.id }}</td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ transportation.destination }}</td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ transportation.number_of_passengers }}</td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ transportation.date_time_needed }}</td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
+                    <span :class="{
+                      'px-2 py-1 rounded-full text-xs': true,
+                      'bg-green-100 text-green-800': transportation.status,
+                      'bg-yellow-100 text-yellow-800': !transportation.status
+                    }">
+                      {{ transportation.status ? 'Approved' : 'Pending' }}
+                    </span>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div v-else class="text-gray-300 p-4 bg-gray-800 rounded-xl">
-            No users found.
+          <div v-else class="text-gray-500 dark:text-gray-400 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 mt-2">
+            No transportation requests found.
           </div>
         </div>
 
         <!-- Venues Table -->
-        <div class="w-full lg:w-1/2">
-          <h2 class="text-xl font-semibold mb-4 text-gray-200">Venues</h2>
-          <div v-if="props.venues.length" class="overflow-x-auto bg-gray-800 rounded-xl shadow-md">
-            <table class="min-w-full divide-y divide-gray-700">
-              <thead class="bg-gray-700">
+        <div class="w-full lg:w-1/2 max-w-2xl mx-auto">
+          <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Venues Reservation</h2>
+          <div v-if="props.venues.length" class="overflow-x-auto rounded-xl shadow-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead class="bg-gray-100 dark:bg-gray-800">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-300">ID</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-300">Event Title</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-300">Date</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-300">Participants</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-300">Conference Type</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Event Title</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Date</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Participants</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Conference Type</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-700">
-                <tr v-for="venue in props.venues" :key="venue.id" class="hover:bg-gray-700">
-                  <td class="px-6 py-4">{{ venue.id }}</td>
-                  <td class="px-6 py-4">{{ venue.title_of_event }}</td>
-                  <td class="px-6 py-4">{{ venue.date_of_event }}</td>
-                  <td class="px-6 py-4">{{ venue.number_of_participants }}</td>
-                  <td class="px-6 py-4">{{ venue.conference_type }}</td>
+              <tbody>
+                <tr v-for="venue in props.venues" :key="venue.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ venue.id }}</td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ venue.title_of_event }}</td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ venue.date_of_event }}</td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ venue.number_of_participants }}</td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ venue.conference_type }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div v-else class="text-gray-300 p-4 bg-gray-800 rounded-xl">
+          <div v-else class="text-gray-500 dark:text-gray-400 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 mt-2">
             No venues found.
           </div>
         </div>

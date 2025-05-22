@@ -20,15 +20,29 @@ class RegisterController extends Controller
             'division' => 'required|string',
         ]);
 
-        $user = StaffUser::create([
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'position' => $request->position,
-            'division' => $request->division,
-        ]);
+        try {
+            $user = StaffUser::create([
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => $request->password,
+                'position' => $request->position,
+                'division' => $request->division,
+            ]);
 
-        return response()->json(['message' => 'User registered successfully!', 'user' => $user], 201);
+            \Log::info('User registered successfully', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'username' => $user->username
+            ]);
+
+            return response()->json(['message' => 'User registered successfully!', 'user' => $user], 201);
+        } catch (\Exception $e) {
+            \Log::error('Registration failed', [
+                'error' => $e->getMessage(),
+                'email' => $request->email
+            ]);
+            return response()->json(['message' => 'Registration failed', 'error' => $e->getMessage()], 500);
+        }
     }
 }
     
