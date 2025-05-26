@@ -21,6 +21,8 @@ return new class extends Migration
             $table->time('time_end');
             $table->string('attachment')->nullable();
             $table->string('title_of_event');            
+            $table->boolean('status')->default(false);
+            $table->boolean('is_approved_by')->default(false);
             $table->timestamps();
         });
     }

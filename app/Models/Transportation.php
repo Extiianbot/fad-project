@@ -18,7 +18,7 @@ class Transportation extends Model
         'is_approved_by',
         'status',
         'attachment',
-        'user_id',
+        'staff_user_id',
     ];
 
         // Cast date fields and status properly
@@ -33,8 +33,8 @@ class Transportation extends Model
     /**
      * Get the user who requested the transportation.
      */
-    public function user()
+    public function staff_user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(StaffUser::class, 'staff_user_id', 'id');
     }
 }

@@ -10,9 +10,9 @@
       <div class="flex-1 flex justify-center">
         <ul class="flex gap-8 text-sm font-medium text-gray-700 dark:text-gray-200">
           <li><a href="/dashboard" class="hover:text-blue-700 dark:hover:text-blue-400 transition">Request Form</a></li>
-          <li><a href="#" class="hover:text-blue-700 dark:hover:text-blue-400 transition">Transportation Request</a></li>
-          <li><a href="#" class="hover:text-blue-700 dark:hover:text-blue-400 transition">Venue Reservation</a></li>
-          <li><a href="#" class="hover:text-blue-700 dark:hover:text-blue-400 transition">Pending Requests</a></li>
+          <li><Link :href="route('transportations.index')" class="hover:text-blue-700 dark:hover:text-blue-400 transition">Transportation Request</Link></li>
+          <li><Link :href="route('venues.index')" class="hover:text-blue-700 dark:hover:text-blue-400 transition">Venue Requests</Link></li>
+          <li><Link :href="route('venues.pending')" class="hover:text-blue-700 dark:hover:text-blue-400 transition">Pending Venue Requests</Link></li>
         </ul>
       </div>
       <!-- Right Side: Theme Toggle + Sign Out -->
@@ -38,7 +38,7 @@
 
 <script setup lang="js">
 import { ref, onMounted } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { router, Link } from '@inertiajs/vue3'
 
 const isDark = ref(false)
 

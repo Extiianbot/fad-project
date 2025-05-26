@@ -17,6 +17,32 @@ const props = defineProps({
   },
 });
 
+// Helper functions for formatting dates and times
+const formatDate = (date) => {
+  if (!date) return '';
+  return new Date(date).toLocaleDateString();
+};
+
+const formatTime = (time) => {
+  if (!time) return '';
+  return new Date(time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+};
+
+const formatDateTime = (dateTime) => {
+  if (!dateTime) return '';
+  return new Date(dateTime).toLocaleString();
+};
+
+// Helper function to format status
+const formatStatus = (status) => {
+  return status ? 'Approved' : 'Pending';
+};
+
+// Helper function to get staff user name
+const getStaffUserName = (staffUser) => {
+  return staffUser?.username || 'Unknown';
+};
+
 const showRegisterModal = ref(false);
 const showLoginModal = ref(false);
 
@@ -173,7 +199,8 @@ function submitLogin() {
                   <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">ID</th>
                   <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Destination</th>
                   <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Passengers</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Date Needed</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Time Needed</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Staff User</th>
                   <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Status</th>
                 </tr>
               </thead>
@@ -182,14 +209,19 @@ function submitLogin() {
                   <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ transportation.id }}</td>
                   <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ transportation.destination }}</td>
                   <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ transportation.number_of_passengers }}</td>
-                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ transportation.date_time_needed }}</td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
+                    {{ formatTime(transportation.date_time_needed) }}
+                  </td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
+                    {{ getStaffUserName(transportation.staff_user) }}
+                  </td>
                   <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
                     <span :class="{
                       'px-2 py-1 rounded-full text-xs': true,
                       'bg-green-100 text-green-800': transportation.status,
                       'bg-yellow-100 text-yellow-800': !transportation.status
                     }">
-                      {{ transportation.status ? 'Approved' : 'Pending' }}
+                      {{ formatStatus(transportation.status) }}
                     </span>
                   </td>
                 </tr>
@@ -201,33 +233,57 @@ function submitLogin() {
           </div>
         </div>
 
-        <!-- Venues Table -->
+        <!-- Venue Table -->
         <div class="w-full lg:w-1/2 max-w-2xl mx-auto">
-          <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Venues Reservation</h2>
+          <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Venue Reservations</h2>
           <div v-if="props.venues.length" class="overflow-x-auto rounded-xl shadow-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead class="bg-gray-100 dark:bg-gray-800">
                 <tr>
                   <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">ID</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Event Title</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Date</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Title</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Type</th>
                   <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Participants</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Conference Type</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Date</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Time Start</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Time End</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Staff User</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200">Status</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="venue in props.venues" :key="venue.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
                   <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ venue.id }}</td>
                   <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ venue.title_of_event }}</td>
-                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ venue.date_of_event }}</td>
-                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ venue.number_of_participants }}</td>
                   <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ venue.conference_type }}</td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ venue.number_of_participants }}</td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
+                    {{ formatDate(venue.date_of_event) }}
+                  </td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
+                    {{ formatTime(venue.time_start) }}
+                  </td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
+                    {{ formatTime(venue.time_end) }}
+                  </td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
+                    {{ getStaffUserName(venue.staff_user) }}
+                  </td>
+                  <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
+                    <span :class="{
+                      'px-2 py-1 rounded-full text-xs': true,
+                      'bg-green-100 text-green-800': venue.status,
+                      'bg-yellow-100 text-yellow-800': !venue.status
+                    }">
+                      {{ formatStatus(venue.status) }}
+                    </span>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div v-else class="text-gray-500 dark:text-gray-400 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 mt-2">
-            No venues found.
+            No venue reservations found.
           </div>
         </div>
       </div>

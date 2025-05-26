@@ -10,10 +10,10 @@ import { Link } from '@inertiajs/vue3'
       <h1 class="text-2xl font-bold mb-8">Welcome to the Reservation System</h1>
       <div class="flex gap-4">
         <Link
-          :href="route('conference-room.create')"
+          :href="route('venue.create')"
           class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
         >
-          Conference Hall Reservation Form
+          Venue Reservation Form
         </Link>
         <Link
           :href="route('transportation.create')"
@@ -24,4 +24,4 @@ import { Link } from '@inertiajs/vue3'
       </div>
     </div>
   </div>
-</template> 
+</template>
