@@ -19,18 +19,32 @@ const deleteVenue = (id) => {
 
 const formatDate = (date) => {
     if (!date) return '';
-    const dateObj = new Date(date);
-    return dateObj.toLocaleDateString();
+    try {
+        const dateObj = new Date(date);
+        if (isNaN(dateObj.getTime())) {
+            return date; // Return original value if date is invalid
+        }
+        return dateObj.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        });
+    } catch (error) {
+        return date; // Return original value if parsing fails
+    }
 };
 
 const formatTime = (time) => {
     if (!time) return '';
-    // Extract just the time part (HH:MM)
-    const timeParts = time.split(':');
-    if (timeParts.length >= 2) {
-        return `${timeParts[0]}:${timeParts[1]}`;
-    }
-    return time;
+    
+    // Split the time string into hours and minutes
+    const [hours, minutes] = time.split(':');
+    
+    // Convert hours to 12-hour format
+    const hour12 = parseInt(hours) % 12 || 12;
+    const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+    
+    return `${hour12.toString().padStart(2, '0')}:${minutes} ${ampm}`;
 };
 </script>
 

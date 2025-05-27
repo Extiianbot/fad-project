@@ -10,7 +10,16 @@ const props = defineProps({
 });
 
 const formatDateTime = (dateTime) => {
-    return new Date(dateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const date = new Date(dateTime);
+    return `${date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    })} ${date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    })}`;
 };
 </script>
 
@@ -49,10 +58,10 @@ const formatDateTime = (dateTime) => {
                                 {{ request.purpose }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                {{ new Date(request.date_time_needed).toLocaleString() }}
+                                {{ formatDateTime(request.date_time_needed) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                {{ new Date(request.date_time_returned).toLocaleString() }}
+                                {{ formatDateTime(request.date_time_returned) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <span :class="{

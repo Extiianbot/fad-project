@@ -12,7 +12,7 @@
           <li><a href="/dashboard" class="hover:text-blue-700 dark:hover:text-blue-400 transition">Request Form</a></li>
           <li><Link :href="route('transportations.index')" class="hover:text-blue-700 dark:hover:text-blue-400 transition">Transportation Request</Link></li>
           <li><Link :href="route('venues.index')" class="hover:text-blue-700 dark:hover:text-blue-400 transition">Venue Requests</Link></li>
-          <li><Link :href="route('venues.pending')" class="hover:text-blue-700 dark:hover:text-blue-400 transition">Pending Venue Requests</Link></li>
+          <li><Link :href="route('requests.pending')" class="hover:text-blue-700 dark:hover:text-blue-400 transition">Pending Requests</Link></li>
         </ul>
       </div>
       <!-- Right Side: Theme Toggle + Sign Out -->
