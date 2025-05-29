@@ -28,12 +28,15 @@ const editRequest = (request) => {
     editModalOpen.value = true;
 };
 
-// Add a watcher to reset selectedRequest when modals close
-watch(() => [viewModalOpen.value, editModalOpen.value], ([newView, newEdit]) => {
+watch(
+  () => [viewModalOpen.value, editModalOpen.value],
+  ([newView, newEdit]) => {
     if (!newView && !newEdit) {
-        selectedRequest.value = null;
+      selectedRequest.value = null;
     }
-});
+  },
+  { immediate: true }
+);
 
 const props = defineProps({
     requests: {
@@ -88,7 +91,6 @@ const deleteRequest = async (request) => {
                 :show="editModalOpen" 
                 :request="selectedRequest"
                 @close="editModalOpen = false"
-                @refresh="refreshData"
                 v-if="editModalOpen"
             />
 
@@ -137,7 +139,7 @@ const deleteRequest = async (request) => {
                                             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
                                         Edit
                                     </button>
-                                    <button @click="deleteRequest(request.id)"
+                                    <button @click="deleteRequest(request)"
                                             class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">
                                         Delete
                                     </button>

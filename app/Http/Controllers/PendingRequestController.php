@@ -200,9 +200,7 @@ class PendingRequestController extends Controller
         try {
             if ($type === 'venue') {
                 $venue = Venue::findOrFail($id);
-                
-                // Get data directly from request
-                $validated = Validator::validate($request->all(), [
+                $validated = $request->validate([
                     'conference_type' => 'required|string|in:Mini Conference,Conference Hall',
                     'title_of_event' => 'required|string|max:255',
                     'number_of_participants' => 'required|integer|min:1',
@@ -212,7 +210,6 @@ class PendingRequestController extends Controller
                     'attachment' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx'
                 ]);
     
-                // Handle file upload if new file is provided
                 if ($request->hasFile('attachment')) {
                     if ($venue->attachment) {
                         $path = storage_path('app/public/' . $venue->attachment);
@@ -224,14 +221,10 @@ class PendingRequestController extends Controller
                 }
     
                 $venue->update($validated);
-                
-                // Return the updated data
-                return redirect()->route('requests.pending')->with('success', 'Venue request updated successfully');
+                return redirect()->route('requests.pending');
             } else {
                 $transportation = Transportation::findOrFail($id);
-                
-                // Get data directly from request
-                $validated = Validator::validate($request->all(), [
+                $validated = $request->validate([
                     'destination' => 'required|string|max:255',
                     'number_of_passengers' => 'required|integer|min:1',
                     'purpose' => 'required|string|max:255',
@@ -240,7 +233,6 @@ class PendingRequestController extends Controller
                     'attachment' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx'
                 ]);
     
-                // Handle file upload if new file is provided
                 if ($request->hasFile('attachment')) {
                     if ($transportation->attachment) {
                         $path = storage_path('app/public/' . $transportation->attachment);
@@ -252,9 +244,7 @@ class PendingRequestController extends Controller
                 }
     
                 $transportation->update($validated);
-                
-                // Return the updated data
-                return redirect()->route('requests.pending')->with('success', 'Transportation request updated successfully');
+                return redirect()->route('requests.pending');
             }
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to update request: ' . $e->getMessage());

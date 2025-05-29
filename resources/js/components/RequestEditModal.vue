@@ -60,7 +60,7 @@ watch(() => props.request, (newRequest) => {
 const updateRequest = async () => {
     try {
         loading.value = true;
-        console.log('Form data:', form);
+        console.log('Sending data:', form);
         
         // Get the data directly from the nested object
         const data = form.type === 'transportation' 
@@ -85,7 +85,7 @@ const updateRequest = async () => {
             }
         });
     } catch (error) {
-        console.error('Update failed:', error);
+        console.error('Error:', error);
     } finally {
         loading.value = false;
     }
