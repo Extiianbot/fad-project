@@ -37,4 +37,6 @@ class Transportation extends Model
     {
         return $this->belongsTo(StaffUser::class, 'staff_user_id', 'id');
     }
+
+    
 }

@@ -24,8 +24,16 @@ const formatDate = (date) => {
 };
 
 const formatTime = (time) => {
-  if (!time) return '';
-  return new Date(time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    if (!time) return '';
+    
+    // Split the time string into hours and minutes
+    const [hours, minutes] = time.split(':');
+    
+    // Convert hours to 12-hour format
+    const hour12 = parseInt(hours) % 12 || 12;
+    const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+    
+    return `${hour12.toString().padStart(2, '0')}:${minutes} ${ampm}`;
 };
 
 const formatDateTime = (dateTime) => {

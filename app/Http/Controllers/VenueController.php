@@ -52,7 +52,7 @@ class VenueController extends Controller
     {
         $validated = $request->validate([
             'title_of_event' => 'required|string|max:255',
-            'conference_type' => 'required|string|in:seminar,workshop',
+            'conference_type' => 'required|string|in:Mini Conference,Conference Hall',
             'number_of_participants' => 'required|integer|min:1',
             'date_of_event' => 'required|date',
             'time_start' => 'required|date_format:H:i',

@@ -29,8 +29,8 @@
             required
           >
             <option value="">Select Conference Type</option>
-            <option value="seminar">Mini Conference</option>
-            <option value="workshop">Conference Hall</option>
+            <option value="Mini Conference">Mini Conference</option>
+            <option value="Conference Hall">Conference Hall</option>
           </select>
         </div>
 
@@ -143,6 +143,10 @@ const handleSubmit = () => {
 };
 
 const handleFileUpload = (event) => {
-  form.attachment = event.target.files[0];
+  const file = event.target.files[0];
+  form.attachment = file;
+  const originalFileName = file.name;
+  console.log(originalFileName); // This will output "vacuum.docx"
 };
+
 </script>

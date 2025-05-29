@@ -26,7 +26,10 @@ const handleSubmit = () => {
 };
 
 const handleFileUpload = (event) => {
-    form.attachment = event.target.files[0];
+  const file = event.target.files[0];
+  form.attachment = file;
+  const originalFileName = file.name;
+  console.log(originalFileName); // e.g. "YzWLKVFFLePRmZ1gLJZtL6qaXiN90RB9wrEjzMV9.docx"
 };
 </script>
 

@@ -55,7 +55,12 @@ Route::delete('/venue/{id}', [VenueController::class, 'destroy'])->name('venues.
 Route::get('/requests', [PendingRequestController::class, 'pendingRequests'])->name('requests.pending');
 Route::get('/requests/{id}/{type}/view', [PendingRequestController::class, 'viewRequest'])->name('requests.view');
 Route::get('/requests/{id}/{type}/edit', [PendingRequestController::class, 'editRequest'])->name('requests.edit');
+Route::put('/requests/{id}/{type}', [PendingRequestController::class, 'updateRequest'])->name('requests.update');
 Route::delete('/requests/{id}/{type}', [PendingRequestController::class, 'deleteRequest'])->name('requests.delete');
+
+
+Route::get('/api/request/{id}/{type}', [PendingRequestController::class, 'getRequestDetails']);
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

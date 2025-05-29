@@ -1,7 +1,39 @@
 <script setup>
+import { ref, watch } from 'vue';
 import { defineProps } from 'vue';
 import HomeNavBar from '../components/HomeNavBar.vue';
 import { router, usePage } from '@inertiajs/vue3';
+import RequestViewModal from '../components/RequestViewModal.vue';
+import RequestEditModal from '../components/RequestEditModal.vue';
+import axios from 'axios';
+const viewModalOpen = ref(false);
+const editModalOpen = ref(false);
+const selectedRequest = ref(null);
+const loading = ref(false);
+
+/*const viewRequest = (request) =>
+ {
+    selectedRequest.value = request;
+    viewModalOpen.value = true;
+};*/
+
+const viewRequest = async (request) => {
+    const res = await axios.get(`/api/request/${request.id}/${request.type}`);
+    selectedRequest.value = res.data;
+    viewModalOpen.value = true;
+};
+
+const editRequest = (request) => {
+    selectedRequest.value = request;
+    editModalOpen.value = true;
+};
+
+// Add a watcher to reset selectedRequest when modals close
+watch(() => [viewModalOpen.value, editModalOpen.value], ([newView, newEdit]) => {
+    if (!newView && !newEdit) {
+        selectedRequest.value = null;
+    }
+});
 
 const props = defineProps({
     requests: {
@@ -15,25 +47,26 @@ const formatDateTime = (dateTime) => {
     return new Date(dateTime).toLocaleString();
 };
 
-const viewRequest = (id, type) => {
-    router.get(`/requests/${id}/${type}/view`);
+
+// Add event listener for refresh
+const closeModal = () => {
+    editModalOpen.value = false;
+    selectedRequest.value = null;
 };
 
-const editRequest = (id, type) => {
-    router.get(`/requests/${id}/${type}/edit`);
-};
-
-const deleteRequest = (id, type) => {
+const deleteRequest = async (request) => {
     if (confirm('Are you sure you want to delete this request?')) {
-        router.delete(`/requests/${id}/${type}`)
-            .then(() => {
-                // Refresh the page after successful deletion
-                router.visit('/requests');
-            })
-            .catch(error => {
-                console.error('Error deleting request:', error);
-                alert('Failed to delete request. Please try again.');
-            });
+        try {
+            loading.value = true;
+            await router.delete(`/requests/${request.id}/${request.type}`);
+            // Refresh the page after successful deletion
+            router.visit('/requests');
+        } catch (error) {
+            console.error('Error deleting request:', error);
+            alert('Failed to delete request. Please try again.');
+        } finally {
+            loading.value = false;
+        }
     }
 };
 </script>
@@ -41,7 +74,24 @@ const deleteRequest = (id, type) => {
 <template>
     <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
         <HomeNavBar />
+
         <div class="container mx-auto px-4 py-8">
+
+            <RequestViewModal 
+                :show="viewModalOpen" 
+                :request="selectedRequest"
+                @close="viewModalOpen = false"
+                v-if="viewModalOpen"
+            />
+            
+            <RequestEditModal 
+                :show="editModalOpen" 
+                :request="selectedRequest"
+                @close="editModalOpen = false"
+                @refresh="refreshData"
+                v-if="editModalOpen"
+            />
+
             <h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">My Requests</h1>
             
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
@@ -79,11 +129,11 @@ const deleteRequest = (id, type) => {
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-2">
-                                    <button @click="viewRequest(request.id)"
+                                    <button @click="viewRequest(request)"
                                             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
                                         View
                                     </button>
-                                    <button @click="editRequest(request.id)"
+                                    <button @click="editRequest(request)"
                                             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
                                         Edit
                                     </button>

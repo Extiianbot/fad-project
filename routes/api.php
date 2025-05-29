@@ -19,3 +19,4 @@ Route::get('/register', function () {
 });
 
 Route::post('/login', [LoginController::class, 'login']);
+

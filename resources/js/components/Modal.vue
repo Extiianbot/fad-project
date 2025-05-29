@@ -15,8 +15,20 @@
         &times;
       </button>
 
-      <!-- Modal Content Slot -->
-      <slot />
+      <!-- Modal Header -->
+      <div v-if="$slots.header" class="mb-4">
+        <slot name="header" />
+      </div>
+
+      <!-- Modal Body -->
+      <div v-if="$slots.body" class="mb-4">
+        <slot name="body" />
+      </div>
+
+      <!-- Modal Footer -->
+      <div v-if="$slots.footer">
+        <slot name="footer" />
+      </div>
     </div>
   </div>
 </template>

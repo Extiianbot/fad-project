@@ -6,10 +6,72 @@ use App\Models\Venue;
 use App\Models\Transportation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
+use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 
 class PendingRequestController extends Controller
 {
+    public function index()
+    {
+        // Get all venues with their details
+        $venues = Venue::with('staffUser')
+            ->get()
+            ->map(function ($venue) {
+                return [
+                    'id' => $venue->id,
+                    'type' => 'venue',
+                    'date' => $venue->date_of_event,
+                    'created_at' => $venue->created_at,
+                    'status' => $venue->status,
+                    'is_approved_by' => $venue->is_approved_by,
+                    'venue' => [
+                        'conference_type' => $venue->conference_type,
+                        'number_of_participants' => $venue->number_of_participants,
+                        'title_of_event' => $venue->title_of_event,
+                        'date_of_event' => $venue->date_of_event,
+                        'time_start' => $venue->time_start,
+                        'time_end' => $venue->time_end,
+                        'attachment' => $venue->attachment
+                    ],
+                    'staff_user_id' => $venue->staff_user_id
+                ];
+            });
+
+        // Get all transportations with their details
+        $transportations = Transportation::with('staffUser')
+            ->get()
+            ->map(function ($transportation) {
+                return [
+                    'id' => $transportation->id,
+                    'type' => 'transportation',
+                    'date' => $transportation->date_time_needed,
+                    'created_at' => $transportation->created_at,
+                    'status' => $transportation->status,
+                    'is_approved_by' => $transportation->is_approved_by,
+                    'transportation' => [
+                        'destination' => $transportation->destination,
+                        'number_of_passengers' => $transportation->number_of_passengers,
+                        'purpose' => $transportation->purpose,
+                        'date_time_needed' => $transportation->date_time_needed,
+                        'date_time_returned' => $transportation->date_time_returned,
+                        'attachment' => $transportation->attachment
+                    ],
+                    'staff_user_id' => $transportation->staff_user_id
+                ];
+            });
+
+        // Combine both collections
+        $requests = $venues->merge($transportations)
+            ->sortBy('created_at')
+            ->values();
+
+        return Inertia::render('PendingRequestTable', [
+            'requests' => $requests,
+            'auth' => Auth::user(),
+        ]);
+    }
+
     public function pendingRequests()
     {
         // Get venue requests with timestamps
@@ -58,10 +120,40 @@ class PendingRequestController extends Controller
 
     public function viewRequest($id, $type)
     {
-        if ($type === 'venue') {
-            return redirect()->route('venues.show', $id);
+        if ($type === 'venue') 
+        {
+            $venue = Venue::with('staff_user')->find($id);
+           
+            return Inertia::render('PendingRequestTable', [
+            'requests' => [[
+            'type' => 'venue',
+            'venue' => $venue,
+            'id' => $venue->id,
+            'conference' => $venue->conference_type,
+            'status' => $venue->status,
+            'created_at' => $venue->created_at,
+            
+    ]],
+
+                'auth' => Auth::user(),
+            ]);
         }
-        return redirect()->route('transportations.show', $id);
+        
+        
+        
+        //$transportation = Transportation::with('staff_user')->find($id);
+        $transportation = Transportation::with('staff_user')->find($id);
+        return Inertia::render('PendingRequestTable', [
+            'requests' => [$transportation],
+            'type' => 'transportation',
+            'destination' => $transportation->destination,
+            'number_of_passengers' => $transportation->number_of_passengers,
+            'purpose' => $transportation->purpose,
+            'date_time_needed' => $transportation->date_time_needed,
+            'date_time_returned' => $transportation->date_time_returned,
+            'auth' => Auth::user(),
+        ]);
+        
     }
 
     public function editRequest($id, $type)
@@ -100,4 +192,105 @@ class PendingRequestController extends Controller
             return redirect()->back()->with('error', 'Failed to delete request: ' . $e->getMessage());
         }
     }
+
+
+
+    public function updateRequest(Request $request, $id, $type)
+    {
+        try {
+            if ($type === 'venue') {
+                $venue = Venue::findOrFail($id);
+                
+                // Get data directly from request
+                $validated = Validator::validate($request->all(), [
+                    'conference_type' => 'required|string|in:Mini Conference,Conference Hall',
+                    'title_of_event' => 'required|string|max:255',
+                    'number_of_participants' => 'required|integer|min:1',
+                    'date_of_event' => 'required|date',
+                    'time_start' => 'required|date_format:H:i',
+                    'time_end' => 'required|date_format:H:i',
+                    'attachment' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx'
+                ]);
+    
+                // Handle file upload if new file is provided
+                if ($request->hasFile('attachment')) {
+                    if ($venue->attachment) {
+                        $path = storage_path('app/public/' . $venue->attachment);
+                        if (file_exists($path)) {
+                            unlink($path);
+                        }
+                    }
+                    $validated['attachment'] = $request->file('attachment')->store('attachments', 'public');
+                }
+    
+                $venue->update($validated);
+                
+                // Return the updated data
+                return redirect()->route('requests.pending')->with('success', 'Venue request updated successfully');
+            } else {
+                $transportation = Transportation::findOrFail($id);
+                
+                // Get data directly from request
+                $validated = Validator::validate($request->all(), [
+                    'destination' => 'required|string|max:255',
+                    'number_of_passengers' => 'required|integer|min:1',
+                    'purpose' => 'required|string|max:255',
+                    'date_time_needed' => 'required|date',
+                    'date_time_returned' => 'required|date',
+                    'attachment' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx'
+                ]);
+    
+                // Handle file upload if new file is provided
+                if ($request->hasFile('attachment')) {
+                    if ($transportation->attachment) {
+                        $path = storage_path('app/public/' . $transportation->attachment);
+                        if (file_exists($path)) {
+                            unlink($path);
+                        }
+                    }
+                    $validated['attachment'] = $request->file('attachment')->store('attachments', 'public');
+                }
+    
+                $transportation->update($validated);
+                
+                // Return the updated data
+                return redirect()->route('requests.pending')->with('success', 'Transportation request updated successfully');
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to update request: ' . $e->getMessage());
+        }
+    }
+
+    public function getRequestDetails($id, $type)
+{
+    if ($type === 'venue') {
+        $venue = Venue::with('staff_user')->find($id);
+        return response()->json([
+            'type' => 'venue',
+            'venue' => $venue,
+            'id' => $venue->id,
+            'conference' => $venue->conference_type,
+            'status' => $venue->status,
+            'created_at' => $venue->created_at,
+        ]);
+    } else {
+        $transportation = Transportation::with('staff_user')->find($id);
+        return response()->json([
+            'type' => 'transportation',
+            'transportation' => [
+                'destination' => $transportation->destination,
+                'number_of_passengers' => $transportation->number_of_passengers,
+                'purpose' => $transportation->purpose,
+                'date_time_needed' => $transportation->date_time_needed,
+                'date_time_returned' => $transportation->date_time_returned,
+                'attachment' => $transportation->attachment,
+                'staff_user' => $transportation->staff_user
+            ],
+            'id' => $transportation->id,
+            'status' => $transportation->status,
+            'is_approved_by' => $transportation->is_approved_by,
+            'created_at' => $transportation->created_at
+        ]);
+    }
+}
 }
