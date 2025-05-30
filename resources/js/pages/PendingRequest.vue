@@ -33,6 +33,7 @@ const formatDateTime = (dateTime) => {
         minute: '2-digit',
         hour12: true
     })}`;
+};
 </script>
 
 <template>

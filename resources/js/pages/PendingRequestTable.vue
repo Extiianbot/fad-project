@@ -5,11 +5,18 @@ import HomeNavBar from '../components/HomeNavBar.vue';
 import { router, usePage } from '@inertiajs/vue3';
 import RequestViewModal from '../components/RequestViewModal.vue';
 import RequestEditModal from '../components/RequestEditModal.vue';
+//import { ToastContainer } from 'vue3-toastify';
 import axios from 'axios';
+
+
+// Register ToastContainer globally
+const toastContainer = ref(null);
+
 const viewModalOpen = ref(false);
 const editModalOpen = ref(false);
 const selectedRequest = ref(null);
 const loading = ref(false);
+
 
 /*const viewRequest = (request) =>
  {
@@ -23,9 +30,28 @@ const viewRequest = async (request) => {
     viewModalOpen.value = true;
 };
 
-const editRequest = (request) => {
-    selectedRequest.value = request;
+/*
+const editRequest = async (request) => {
+    const res = await axios.get(`/api/request/${request.id}/${request.type}`);
+    selectedRequest.value = res.data;
     editModalOpen.value = true;
+};
+*/
+
+const editRequest = async (request) => {
+    try {
+        const res = await axios.get(`/api/request/${request.id}/${request.type}`);
+        selectedRequest.value = res.data;
+        editModalOpen.value = true;
+        // Store the current request index for refresh
+        const requestIndex = props.requests.findIndex(r => r.id === request.id);
+        if (requestIndex !== -1) {
+            selectedRequest.value.requestIndex = requestIndex;
+        }
+    } catch (error) {
+        console.error('Error fetching request data:', error);
+        alert('Failed to load request data. Please try again.');
+    }
 };
 
 watch(
@@ -50,6 +76,25 @@ const formatDateTime = (dateTime) => {
     return new Date(dateTime).toLocaleString();
 };
 
+// Add a watch for the edit modal close
+watch(() => editModalOpen.value, (newVal) => {
+    if (!newVal) {
+        console.log('Edit modal closed, refreshing...');
+        refreshRequests();
+    }
+});
+
+// In PendingRequestTable.vue
+const refreshRequests = () => {
+    console.log('Refreshing requests...');
+    router.get('/requests', {}, {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+            console.log('Requests refreshed successfully');
+        }
+    });
+};
 
 // Add event listener for refresh
 const closeModal = () => {
@@ -77,7 +122,7 @@ const deleteRequest = async (request) => {
 <template>
     <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
         <HomeNavBar />
-
+        
         <div class="container mx-auto px-4 py-8">
 
             <RequestViewModal 
@@ -93,6 +138,8 @@ const deleteRequest = async (request) => {
                 @close="editModalOpen = false"
                 v-if="editModalOpen"
             />
+
+            
 
             <h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">My Requests</h1>
             

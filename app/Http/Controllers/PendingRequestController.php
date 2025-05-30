@@ -6,7 +6,6 @@ use App\Models\Venue;
 use App\Models\Transportation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 
@@ -193,8 +192,6 @@ class PendingRequestController extends Controller
         }
     }
 
-
-
     public function updateRequest(Request $request, $id, $type)
     {
         try {
@@ -221,7 +218,7 @@ class PendingRequestController extends Controller
                 }
     
                 $venue->update($validated);
-                return redirect()->route('requests.pending');
+                return Inertia::location(route('requests.pending'));
             } else {
                 $transportation = Transportation::findOrFail($id);
                 $validated = $request->validate([
@@ -244,10 +241,10 @@ class PendingRequestController extends Controller
                 }
     
                 $transportation->update($validated);
-                return redirect()->route('requests.pending');
+                return Inertia::location(route('requests.pending'));
             }
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to update request: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Failed to update request: ' . $e->getMessage()]);
         }
     }
 
